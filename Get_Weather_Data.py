@@ -1,14 +1,19 @@
 import json
 import urllib.request
 import Defines as d
+import logging
 
 class Get_Weather_Data():
     def __init__(self):
         pass
 
     def get_data(self, data_client,method_code):
+        
+        #requestul de pe api se face utilizand tcp
+    
         url = 'https://api.openweathermap.org/data/2.5/weather?q={}&appid=8e6e05650e8905f4aecdfaac6cea6a67'.format(data_client)
-        req = urllib.request.Request(url);
+        req = urllib.request.Request(url)
+        
         try:
             with urllib.request.urlopen(req) as response:
                 the_page = response.read()
@@ -16,7 +21,11 @@ class Get_Weather_Data():
             json_data = json.loads(the_page)
         except:
             print("ati introdus orasul gresit")
-            return 404,'0.00'
+            logging.info("ERROR 404 COULD NOT GET FROM API")
+            
+            return 404
+            
+            
         #print(json_data)
         try:
             code       = json_data['cod']
