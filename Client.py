@@ -24,9 +24,9 @@ index_method_list = 0
 
 for i in method_list:
 	if i == 1:
-		a == d.TYPE_CON
+		a = d.TYPE_CON
 	elif i == 2:
-		a == d.TYPE_NON
+		a = d.TYPE_NON
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
 for oras in city_list:
@@ -59,9 +59,5 @@ for oras in city_list:
     time.sleep(2)
 # Inchide conexiune
 sock.close()
-
-
-
-
 
 
