@@ -1,53 +1,50 @@
-import socket
 import json
+import urllib.request
+import Defines as d
 
 class Get_Weather_Data():
     def __init__(self):
         pass
 
-    def get_data(self, data_client):
-        ss=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def get_data(self, data_client,method_code):
+        url = 'https://api.openweathermap.org/data/2.5/weather?q={}&appid=8e6e05650e8905f4aecdfaac6cea6a67'.format(data_client)
+        req = urllib.request.Request(url);
         try:
-            socket.setdefaulttimeout(4)
-            ss.connect(("api.openweathermap.org", 80))
-        except socket.error as ex:
-            print(ex)
-            print("eroare la conexiune!")
-            print("\n")
-            con_error = "eroare la conexiunea de internet"
-            #conn.sendall(con_error.encode("utf-8"))
-            #sys.exit()
-        request = "GET /data/2.5/weather?q=" + data_client + "&APPID=8a999283783fff58a906c31b2e47a26d&units=metric HTTP/1.1\r\nHost: api.openweathermap.org\r\n\r\n"
-        # fac array de bytes din string pentru a fi trimis catre client cu encode
-        req = request.encode("utf-8")
-        # trimit la client
-        ss.sendall(req)
-
-        # primesc ce a introdus clientul de la tastatura (eg : numele orasului)
-        res = ss.recv(5000)
-        # transform in array de bytes cu decode
-        res_decode = res.decode("utf-8")
-
-        find_res = res_decode.rfind('\n')
-        d = json.loads(res[find_res:])
+            with urllib.request.urlopen(req) as response:
+                the_page = response.read()
+            # transform in array de bytes cu decode
+            json_data = json.loads(the_page)
+        except:
+            print("ati introdus orasul gresit")
+            return 404,'0.00'
+        #print(json_data)
         try:
-            temp = d['main']['temp']
-            temp_str = str(temp)
-            print(temp)
-            temp_b = temp_str.encode("utf-8")
-            #conn.sendall(temp_b)
+            code       = json_data['cod']
+            temp       = json_data['main']['temp']
+            temp_min   = json_data['main']['temp_min']
+            temp_max   = json_data['main']['temp_max']
+            pressure   = json_data['main']['pressure']
+            humidity   = json_data['main']['humidity']
+            feels_like = json_data['main']['feels_like']
+
+            if int(method_code) == d.METHOD_CONVERT:
+                temp       = round(temp - 273.15, 2)
+                temp_max   = round(temp_max - 273.15, 2)
+                temp_min   = round(temp_min - 273.15, 2)
+                feels_like = round(feels_like - 273.15, 2)
+
+            info_weather = str(temp)+'-'+ str(feels_like)+'-'+str(temp_min)+'-'+str(temp_max)+'-'+str(pressure)+'-'+str(humidity)
         except KeyError:
-            print("error code- ", d["cod"])
-            print("description -", d["message"])
-            #conn.sendall(d["message"].encode("utf-8"))
+            print("error code- ", json_data["cod"])
+            print("description -", json_data["message"])
+        return code, info_weather
 
-        return d, temp
-
-    def convert_to_Fahrenheit(self, temperatura):
-
-        print("Temperatura in Fahrenheit este: " ,temperatura*9/5+32,"°F")
-        temp = temperatura * 9 / 5 + 32
+    def convert_to_Celsius(self, temperatura):
+        temp = round(temperatura - 273.15,2)
         return temp
+
+
+
 
 
 
