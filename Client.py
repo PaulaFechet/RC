@@ -2,11 +2,15 @@ import socket
 from Message_Header import Message_Header
 from Parse_Message_Service import Parse_Message_Service
 import Defines as d
+import Options as o
 import logging
 import time
 import Inputs as input_city
+
+
 UDP_IP = "127.0.0.1"
 UDP_PORT = 5005
+logging.basicConfig(filename='CLIENT.log',level=logging.DEBUG)
 
 addr = (UDP_IP, UDP_PORT)
 print("UDP target IP:", UDP_IP)
@@ -22,11 +26,15 @@ print("city_list:",city_list)
 print("methood_list:",method_list)
 index_method_list = 0
 
+
+a = 0
 for i in method_list:
-	if i == 1:
-		a = d.TYPE_CON
-	elif i == 2:
-		a = d.TYPE_NON
+    if i == 1:
+        a = int(d.TYPE_CON)
+    elif i == 2:
+        a = int(d.TYPE_NON)
+    elif i == 6:
+        a = int(d.TYPE_CON)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
 for oras in city_list:
@@ -39,25 +47,90 @@ for oras in city_list:
     for x in msg:
         msg_string += str(x)+'/' # fiecare element din lista il facem string si este concatenat la msg_string
     m_package = buildMsg.package(msg_string,oras)
+    
+    #trimit pachet de la client la server
 
     sock.sendto(m_package.encode("utf-8"), addr)
-    #print("receive response")
+    
+    
+    #aici e pachetul primit de la server
 
     data, addr = sock.recvfrom(1024)
     data_decode = data.decode("utf-8")
-    logging.info("From server:", data_decode )
-
-    # print("data_decode:", data_decode)
+    
+    logging.info("data_decode from server TYPE/CON/CLASS/CODE/MID/TOKEN/ ")
+    logging.info(data_decode)
+    
+    
     message_list = list(data_decode.split("/"))
-    #print("message_list:", message_list)
+    
     parsed_message = Parse_Message_Service()
     msg_parsed = parsed_message.Parse(data_decode)
+    
+    logging.info("Mesaj parsat de la server:")
+    logging.info(msg_parsed.Print())
     date_api = list(msg_parsed.payload.split("-"))
-    #print("date_api:",date_api)
-    #print("temperatura:",date_api[0])
+    #aici primim date legate de vreme
+    
     print("Data primita este", msg_parsed.payload)
     time.sleep(2)
 # Inchide conexiune
 sock.close()
 
 
+
+print("PRESS CTRL-C TO EXIT THE PROG...")
+try:
+    while True:
+        pass
+except KeyboardInterrupt:
+    print ("Exiting")
+    exit(0)
+
+
+
+
+
+
+
+"""
+import socket
+from Message_Header import Message_Header
+from Parse_Message_Service import Parse_Message_Service
+import Defines as d
+import logging
+import time
+
+class Client_request():
+    def __init__(self):
+        pass
+
+    def GET(self,oras,method,addr):
+        print("METHOD:",method)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+        buildMsg = Message_Header() # construim pachetul pe care il trimitem la server
+        msg = buildMsg.BuildMessage(d.COAP_VERSION, d.TYPE_CON, d.COAP_CLASS_METHODS,method,d.newMessageId(), d.newToken())
+        buildMsg.Print()
+        msg_string = "" # msg to string pt encode
+        for x in msg:
+            msg_string += str(x)+'/'
+        m = buildMsg.package(msg_string,oras)
+        try:
+            sock.sendto(m.encode("utf-8"), addr)
+
+            print("receive response")
+            data, addr = sock.recvfrom(1024)
+            time.sleep(2)
+            data_decode = data.decode("utf-8")
+            print("data_decode:", data_decode)
+            message_list = list(data_decode.split("/"))
+            print("message_list:", message_list)
+            parsed_message = Parse_Message_Service()
+            msg_parsed = parsed_message.Parse(data_decode)
+            date_api = list(msg_parsed.payload.split("-"))
+            print("date_api:",date_api)
+            print("temperatura:",date_api[0])
+            print("Data primita este", msg_parsed)
+        finally:
+            sock.close()
+"""
