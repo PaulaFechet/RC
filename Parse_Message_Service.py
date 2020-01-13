@@ -5,21 +5,30 @@ class Parse_Message_Service():
         pass
 
     def Parse(self,BinaryString):
+        message_list = list(BinaryString.split("/"))
+       # print("message_list:",message_list)
         message_header = Message_Header()
-        message_header.VERSION = int(BinaryString[0:2] ,2)
-        print("\nmessage_header.VERSION:", message_header.VERSION)
-        message_header.TYPE = int(BinaryString[2:4],2)
-        print("\nmessage_header.TYPE:" ,message_header.TYPE)
-        message_header.TOKEN_LENGTH = int(BinaryString[4:8],2)
-        print("\nmessage.token_length:", message_header.TOKEN_LENGTH)
-        message_header.CLASS = BinaryString[8:11]
-        print("\nmessage_header.CLASS: ", message_header.CLASS)
-        message_header.CODE = BinaryString[11:16]
-        print("\n message_header.CODE: ", message_header.CODE)
-        message_header.MESSAGE_ID = BinaryString[16:32]
-        print("\nmessage_header. MESSAGE_ID", message_header.MESSAGE_ID)
-        message_header.token = BinaryString[32: int(message_header.TOKEN_LENGTH)*8]
-        print("\nmessage_header.TOKEN: ", message_header.token)
+        message_header.VERSION = message_list[0]
+       # print("\nmessage_header.VERSION:", message_header.VERSION)
+        message_header.TYPE = message_list[1]
+       # print("\nmessage_header.TYPE:" ,message_header.TYPE)
+        message_header.TOKEN_LENGTH = message_list[2]
+       # print("\nmessage.token_length:", message_header.TOKEN_LENGTH)
+        message_header.CLASS = message_list[3]
+        #print("\nmessage_header.CLASS: ", message_header.CLASS)
+        message_header.CODE = message_list[4]
+       # print("\n message_header.CODE: ", message_header.CODE)
+        message_header.MESSAGE_ID = message_list[5]
+       # print("\nmessage_header. MESSAGE_ID", message_header.MESSAGE_ID)
 
+        if message_header.TOKEN_LENGTH:
+            message_header.token = message_list[6]
+        else:
+            message_header.token = None
+       # print("\nmessage_header.TOKEN: ", message_header.token)
+        payload_code = message_list[7]
+        message_header.payload = payload_code[3:]
+       # print("\nmessage_header.payload: ", message_header.payload)
         return message_header
+
 
