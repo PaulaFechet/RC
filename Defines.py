@@ -1,5 +1,6 @@
 COAP_PAYLOAD_MARKER                    = 0xff
 
+
 COAP_VERSION =                           1
 # CoAP Message Types
 TYPE_CON                               = 0
@@ -8,6 +9,7 @@ TYPE_ACK                               = 2
 TYPE_RST                               = 3
 
 # CoAP Method Codes
+METHOD_EMPTY                           = 0
 METHOD_GET                             = 1
 METHOD_POST                            = 2
 METHOD_PUT                             = 3
