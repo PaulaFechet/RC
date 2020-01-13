@@ -44,86 +44,105 @@ Response
 2 : Acknowledgement : This message is a response that acknowledge a confirmable message
 3 : Reset : This message indicates that it had received a message but could not process it.
 '''
+import Defines as d
+
 
 class Message_Header():
     def __init__(self):
         self.VERSION = 0
         self.TYPE = 0
-        self.TOKEN_LENGTH = 0
         self.token=0
         self.CLASS=0
 
         self.CODE=0
         self.MESSAGE_ID=0
+        self.options = []
+        self.payload = ''
         message = ""
 
-    def BuildMessage(self, VERSION, TYPE, TOKEN_LENGTH, CLASS, CODE, MESSAGE_ID):
-
-
+    def BuildMessage(self, VERSION, TYPE, CLASS, CODE, MESSAGE_ID,token,options=[]):
         # formatam elementele din header setandu-le dimensiunea
-        self.VERSION = format(VERSION, '02b')
-        self.TYPE = format(TYPE, '02b')
-        self.TOKEN_LENGTH = format(TOKEN_LENGTH, '04b')
+       # assert  self.TYPE in d.TYPE_ALL
+       # assert CODE in d.METHOD_ALL
 
+        self.VERSION = format(VERSION, '02b')
+        self.TYPE = format(TYPE,'02b')
         self.CLASS = format(CLASS, '03b')
         self.CODE = format(CODE, '05b')
         self.MESSAGE_ID = format(MESSAGE_ID, '016b')
+        self.TYPE = TYPE
+        self.CODE = CODE
+        self.token = token
+        self.options = options
+       # self.payload = payload
 
-        message1 = (VERSION) << 6 | TYPE << 4 | TOKEN_LENGTH
-        print("version<<6: " ,VERSION<<6)
-        print("type<<4 ", TYPE<<4)
-        print("TOKEN_LENGTH: ", TOKEN_LENGTH)
-        print("message1: ", message1)
-        message1 = format(message1, '08b')
-        print("message 1: ", message1)
-        message2 = (CLASS) << 5 | CODE
-        print("CLASS << 5:", CLASS<<5)
-        print("CODE : ", CODE)
-        message2 = format(message2, '08b')
-        message3 = self.MESSAGE_ID
+        TKL = 0 #bytes
+        if token:
+            # determine token length
+            for tokenLen in range(1, 8 + 1):
+                if token < (1 << (8 * tokenLen)):
+                    TKL = tokenLen
+                    break
+            if not TKL:
+                raise ('token too long')
 
+        message  = []
+        #header
+        
+        message += [VERSION]
+        message += [TYPE]
+        message += [TKL]
+        message += [CLASS]
+        message +=[CODE]
+        message += [MESSAGE_ID]
+        message += d.int2buf(token,TKL)
 
-        if(TOKEN_LENGTH>0 and TOKEN_LENGTH<=8):
-            self.token=format(self.token,str(self.get_TOKEN_LENGTH()*8)+'b' )
+        #options
+        # add encoded options
+        message += d.encodeOptions(options)
+        # add payload
+       # message += d.encodePayload(payload)
 
-        print("self.token: ", self.token)
+      #  msg = ""
+      #  for x in message:
+       #     msg += str(x)
+       # print("srtingggggg:", msg)
 
-        return str(message1)+str(message2)+str(message3)
-
-    def get_TOKEN_LENGTH(self):
-        return int(str(self.TOKEN_LENGTH),2)
-
-#tokenul trebuie generat de catre client
+        return message
+    def package(self,header,oras):
+        pack = ""
+        pack += header+ str(d.COAP_PAYLOAD_MARKER) + oras
+        return pack
 
     def getVERSION(self):
         return int(str(self.VERSION),2)
-
     def getType(self):
-        return int(str(self.TYPE),2)
-
+        return  self.TYPE#int(str(self.TYPE))
     def getCLass(self):
-        return int(str(self.CLASS),2)
-
+        return int(str(self.CLASS))
     def getCode(self):
-        return int(str(self.CODE),2)
+        return self.CODE
 
     def getMessageId(self):
-        return int(str(self.MESSAGE_ID),2)
-
-
-
+        return int(str(self.MESSAGE_ID))
+    def getToken(self):
+        return int(str(self.token))
+    def getOptions(self):
+        return d.buf2int(self.options)
+    def getPayload(self):
+        return self.payload
 
     def Print(self):
         print("\n We are printing the message format....")
         print("\n VERSION: "+ str(self.getVERSION()))
         print("\n TYPE: "+str(self.getType()))
         print("\n CLASS.CODE: "+ (str(self.getCLass())+"."+str(self.getCode())))
-
         #FOLOSIM MESSAGE ID PENTRU A GASI DUPLICATELE
         #MATCH MESSAGES OF TYPE ACK/RST
         #RESPONSE MESSAGES WILL HAVE THE SAME MESSAGE ID
-
         print("\n MESSAGE ID: " +str(self.getMessageId()))
+        print("\n token: " + str(self.getToken()))
+        print("\n options: " + str(self.getOptions()))
 
 
 '''
