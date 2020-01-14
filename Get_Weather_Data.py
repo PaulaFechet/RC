@@ -48,10 +48,7 @@ class Get_Weather_Data():
             print("description -", json_data["message"])
         return code, info_weather
 
-    def convert_to_Celsius(self, temperatura):
-        temp = round(temperatura - 273.15,2)
-        return temp
-
+    
 
 
 
