@@ -35,7 +35,7 @@ class Broker():
             
             if data:
                 data_decode = data.decode("utf-8")
-                logging.info("data_decode from client TYPE/CON/CLASS/CODE/MID/TOKEN/ ")
+                logging.info("data_decode from client VERSION/TYPE/CON/CLASS/CODE/MID/TOKEN/PAYLOAD ")
                 logging.info(data_decode)
                 #aici e pachetul de la client pe care il parsez
                 parsed_message_locatie = Parse_Message_Service()
@@ -201,6 +201,11 @@ class Broker():
                     m = Pack.Pack(msg_parsed_locatie,info_weather,msg_type,msg_class,msg_code)
                     self.sock.sendto(m.encode("utf-8"), addr)
                 else:
+                    msg_type = d.TYPE_ACK
+                    msg_class = d.COAP_CLASS_ERROR
+                    msg_code = d.CODE_CHANGED
+                    m = Pack.Pack(msg_parsed_locatie,"",msg_type,msg_class,msg_code)
+                    self.sock.sendto(m.encode("utf-8"), addr)
                     logging.info("ERROR: Can not make request from API!")
                 logging.info("CONVERT // 200 OK")
                     
