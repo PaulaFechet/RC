@@ -62,9 +62,7 @@ class Message_Header():
 
     def BuildMessage(self, VERSION, TYPE, CLASS, CODE, MESSAGE_ID,token,options=[]):
         # formatam elementele din header setandu-le dimensiunea
-       # assert  self.TYPE in d.TYPE_ALL
-       # assert CODE in d.METHOD_ALL
-
+       
         self.VERSION = format(VERSION, '02b')
         self.TYPE = format(TYPE,'02b')
         self.CLASS = format(CLASS, '03b')
@@ -97,18 +95,13 @@ class Message_Header():
         message += [MESSAGE_ID]
         message += d.int2buf(token,TKL)
 
-        #options
-        # add encoded options
+       
         message += d.encodeOptions(options)
-        # add payload
-       # message += d.encodePayload(payload)
-
-      #  msg = ""
-      #  for x in message:
-       #     msg += str(x)
-       # print("srtingggggg:", msg)
-
+       
         return message
+
+
+
     def package(self,header,oras):
         pack = ""
         pack += header+ str(d.COAP_PAYLOAD_MARKER) + oras
@@ -171,14 +164,7 @@ VALID = <Successful Response Code 67 “2.03 Valid”>
 CHANGED = <Successful Response Code 68 “2.04 Changed”>
 
 """
-    def set_TOKEN(self, token):
-        if token:
-            for get_TOKEN_LENGTH in range(1, 8+1):
-                if token < (1 << (8*get_TOKEN_LENGTH)):
-                    token = get_TOKEN_LENGTH
-                    break
-            if not token:
-                raise ValueError('token {0] too long '.format(token))
+    
 """
 
 
